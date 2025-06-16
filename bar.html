@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIS Progress</title>
+    <meta name="description" content="NEXIS is an advanced AI system currently under development by Greek Games Studios. Stay tuned!">
+    <link rel="icon" type="image/png" href="logo2.png">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0e0e0e;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+            border-radius: 10px;
+            position: relative;
+            animation: fillBar 3s forwards;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fillBar {
+            from {
+                width: 0%;
+            }
+            to {
+                width: 33%;
+            }
+        }
+
+        .dot {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 33%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dot.start {
+            left: 0;
+        }
+
+        .dot.middle {
+            left: 33%;
+            background: yellow;
+            animation: moveDot 3s forwards;
+        }
+
+        .dot.end {
+            right: 0;
+            background: gray;
+        }
+
+        @keyframes moveDot {
+            from {
+                left: 0%;
+            }
+            to {
+                left: 33%;
+            }
+        }
+
+        .dot:hover {
+            transform: translateY(-50%) scale(1.3);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 1);
+        }
+
+        .dot::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dot:hover::after {
+            opacity: 1;
+        }
+
+        /* Back button style */
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #ffcc00;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+        }
+
+        .back-button:hover {
+            background: #ffaa00;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+        <div class="dot start" data-tooltip="🚀 Project started!"></div>
+        <div class="dot middle" data-tooltip="⚡ Under Development"></div>
+        <div class="dot end" data-tooltip="🎉 Release Coming Soon!"></div>
+        <div class="progress-text">Under Development</div>
+    </div>
+
+    <!-- Back button OUTSIDE the progress-container -->
+    <a href="index.html" class="back-button">Back to Home</a>
+</body>
+</html>

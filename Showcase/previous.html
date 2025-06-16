@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showcase with Dynamic Waves</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+        font-family: Arial, sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown {
+        position: absolute;
+        font-size: 64px;
+        animation: scaleUp 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(1); opacity: 1; }
+        to { transform: scale(1.5); opacity: 0.7; }
+    }
+
+    .container { position: relative; width: 300px; height: 300px; display: none; }
+
+    .circle {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.15) 70%);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        animation: fadeIn 2s ease-in-out forwards;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .ready-button {
+        display: none;
+        padding: 18px 50px;
+        font-size: 28px;
+        font-weight: bold;
+        background: linear-gradient(45deg, #ffcc00, #ff7700);
+        color: black;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(255, 119, 0, 0.8);
+        opacity: 0;
+        animation: fadeInSmooth 2.5s ease-in-out forwards;
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .ready-button:hover {
+        transform: scale(1.15);
+        box-shadow: 0 8px 25px rgba(255, 85, 0, 1);
+    }
+
+    @keyframes fadeInSmooth {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .connecting, .waiting {
+        font-size: 32px;
+        color: yellow;
+        margin-top: 20px;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div id="countdown" class="countdown">Starting in 10 secs...</div>
+<button id="readyButton" class="ready-button">Are you ready?</button>
+<div id="connecting" class="connecting">Connecting to the server...</div>
+<div id="waiting" class="waiting">Waiting to connect...</div>
+
+<div class="container" id="waveContainer">
+    <canvas id="waveform" width="300" height="300"></canvas>
+    <div class="circle"></div>
+</div>
+
+<script>
+    let count = 10;
+    function updateCountdown() {
+        if (count > 1) {
+            count--;
+            document.getElementById("countdown").textContent = count;
+            setTimeout(updateCountdown, 1000);
+        } else {
+            document.getElementById("countdown").textContent = "GO!";
+            setTimeout(showReadyButton, 1000);
+        }
+    }
+
+    function showReadyButton() {
+        document.getElementById("countdown").style.display = "none";
+        document.getElementById("readyButton").style.display = "block";
+    }
+
+    document.getElementById("readyButton").addEventListener("click", function () {
+        this.style.display = 'none';
+        showConnectingMessage();
+    });
+
+    function showConnectingMessage() {
+        const connecting = document.getElementById("connecting");
+        connecting.style.display = "block";
+        setTimeout(() => {
+            connecting.style.display = "none";
+            startShowcase();
+        }, Math.random() * 2000 + 1000);
+    }
+
+    // Waveform Logic
+    const canvas = document.getElementById('waveform');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 120;
+    const bars = 128;
+    let audioContext, analyser, source, bufferLength, dataArray;
+    let colorShift = 0;
+
+    function drawWaveform() {
+        requestAnimationFrame(drawWaveform);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const step = (Math.PI * 2) / bars;
+
+        colorShift += 0.5; // Smooth color shift
+
+        for (let i = 0; i < bars; i++) {
+            const value = dataArray[i];
+            const percent = value / 256;
+            const barHeight = 40 * percent + 10;
+            const angle = step * i;
+
+            const x1 = centerX + Math.cos(angle) * radius;
+            const y1 = centerY + Math.sin(angle) * radius;
+            const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+            const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+
+            const hue = (i * 3 + colorShift) % 360; // Dynamic hue
+            ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+    }
+
+    async function startAudio() {
+        const text = "Hello! I am Nexis, an advanced AI designed to help you with any creative or technical need. Whether you want to write code, create images, design 3D models, produce sound and voices, or just have a conversation, I am here for you. You don't know how to start your project? You need ideas but have no inspiration? You want to write code but don't know how? You need 3D models but don't have time to create them? You want to make a video or an image but don't have the skills? You want to learn something new but find it difficult? I write code for you or guide you step by step. I create unique images and 3D models with precision and detail. I generate natural voices and sound effects for projects, games, or content creation. I help you write stories, articles, or any text you need. I explain concepts and become your personal teacher. I analyze problems and suggest the best solutions. It doesn't matter if you are a developer, an artist, a content creator, or just someone looking for help — Nexis is here to make your life easier. Ready to get started?";
+        const apiKey = "sk_2161e376a433056b2d76eae8917b6f6944d6597b81e4660b";
+        const voiceId = "5Fz0bnhcCWYmX5ZTyxR3";
+
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: "POST",
+            headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ text, model_id: "eleven_monolingual_v1" })
+        });
+
+        const data = await response.blob();
+        const audioURL = URL.createObjectURL(data);
+        const audio = new Audio(audioURL);
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+
+        source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        audio.play();
+        drawWaveform();
+    }
+
+    function startShowcase() {
+        document.getElementById("waveContainer").style.display = "block";
+        startAudio();
+    }
+
+    // Start countdown on load
+    setTimeout(updateCountdown, 1000);
+</script>
+
+</body>
+</html>

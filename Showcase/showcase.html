@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showcase with Dynamic Waves</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+        font-family: Arial, sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown {
+        position: absolute;
+        font-size: 64px;
+        animation: scaleUp 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(1); opacity: 1; }
+        to { transform: scale(1.5); opacity: 0.7; }
+    }
+
+    .container { position: relative; width: 300px; height: 300px; display: none; }
+
+    .circle {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.15) 70%);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        animation: fadeIn 2s ease-in-out forwards;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .ready-button {
+        display: none;
+        padding: 18px 50px;
+        font-size: 28px;
+        font-weight: bold;
+        background: linear-gradient(45deg, #ffcc00, #ff7700);
+        color: black;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(255, 119, 0, 0.8);
+        opacity: 0;
+        animation: fadeInSmooth 2.5s ease-in-out forwards;
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .ready-button:hover {
+        transform: scale(1.15);
+        box-shadow: 0 8px 25px rgba(255, 85, 0, 1);
+    }
+
+    @keyframes fadeInSmooth {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .connecting, .waiting {
+        font-size: 32px;
+        color: yellow;
+        margin-top: 20px;
+        display: none;
+    }
+
+    .fade-out {
+    animation: fadeOut 2s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Glitch Effect στο COMING SOON */
+.coming-soon {
+    font-size: 64px;
+    font-weight: bold;
+    color: white;
+    position: absolute;
+    opacity: 0;
+    transform: scale(0.5);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    display: none;
+    animation: fadeInScale 2s ease-in-out forwards, glitch 1s infinite alternate;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(0, 255, 0, 0.8), 0 0 30px rgba(0, 0, 255, 0.8);
+}
+
+@media (max-width: 600px) {
+    .coming-soon {
+        font-size: 10vw;
+        letter-spacing: 2px;
+    }
+}
+
+/* Back to Home Button */
+.back-button {
+    display: none;
+    padding: 18px 50px;
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #007bff, #00c3ff);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 195, 255, 0.8);
+    opacity: 0;
+    animation: fadeInSmooth 2s ease-in-out forwards;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+    position: absolute;
+    bottom: 50px;
+}
+
+.back-button:hover {
+    transform: scale(1.15) rotate(2deg);
+    box-shadow: 0 8px 30px rgba(0, 150, 255, 1);
+}
+
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="countdown" class="countdown">Starting in 10 secs...</div>
+<button id="readyButton" class="ready-button">Are you ready?</button>
+<div id="connecting" class="connecting">Connecting to the server...</div>
+<div id="waiting" class="waiting">Waiting to connect...</div>
+<div id="comingSoon" class="coming-soon">COMING SOON</div>
+<button id="backButton" class="back-button" onclick="goHome()">Back to Home</button>
+
+<div class="container" id="waveContainer">
+    <canvas id="waveform" width="300" height="300"></canvas>
+    <div class="circle"></div>
+</div>
+
+<script>
+    let count = 10;
+    function updateCountdown() {
+        if (count > 1) {
+            count--;
+            document.getElementById("countdown").textContent = count;
+            setTimeout(updateCountdown, 1000);
+        } else {
+            document.getElementById("countdown").textContent = "GO!";
+            setTimeout(showReadyButton, 1000);
+        }
+    }
+
+    function showReadyButton() {
+        document.getElementById("countdown").style.display = "none";
+        document.getElementById("readyButton").style.display = "block";
+    }
+
+    document.getElementById("readyButton").addEventListener("click", function () {
+        this.style.display = 'none';
+        showConnectingMessage();
+    });
+
+    function showConnectingMessage() {
+        const connecting = document.getElementById("connecting");
+        connecting.style.display = "block";
+        setTimeout(() => {
+            connecting.style.display = "none";
+            startShowcase();
+        }, Math.random() * 2000 + 1000);
+    }
+
+    // Waveform Logic
+    const canvas = document.getElementById('waveform');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 120;
+    const bars = 128;
+    let audioContext, analyser, source, bufferLength, dataArray;
+    let colorShift = 0;
+
+    function drawWaveform() {
+        requestAnimationFrame(drawWaveform);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const step = (Math.PI * 2) / bars;
+
+        colorShift += 0.5;
+
+        for (let i = 0; i < bars; i++) {
+            const value = dataArray[i];
+            const percent = value / 256;
+            const barHeight = 40 * percent + 10;
+            const angle = step * i;
+
+            const x1 = centerX + Math.cos(angle) * radius;
+            const y1 = centerY + Math.sin(angle) * radius;
+            const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+            const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+
+            const hue = (i * 3 + colorShift) % 360;
+            ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+    }
+
+    async function startAudio() {
+    const audio = new Audio("audio.mp3");
+    audio.crossOrigin = "anonymous";
+    audio.loop = false;
+
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    source = audioContext.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    audio.play().catch(error => console.error("Playback error:", error));
+
+    drawWaveform();
+
+    // Όταν τελειώσει το audio, κάνε fade out το wave και μετά εμφάνισε το "COMING SOON"
+    audio.addEventListener("ended", () => {
+        const waveContainer = document.getElementById("waveContainer");
+        waveContainer.classList.add("fade-out");
+
+        setTimeout(() => {
+            waveContainer.style.display = "none";
+            
+            // Εμφανίζουμε το "COMING SOON" + κουμπί
+            const comingSoon = document.getElementById("comingSoon");
+            comingSoon.style.display = "block";
+            comingSoon.style.animation = "fadeInScale 2s ease-in-out forwards, glitch 1s infinite alternate";
+
+            const backButton = document.getElementById("backButton");
+            backButton.style.display = "block";
+            backButton.style.animation = "fadeInSmooth 2s ease-in-out forwards";
+        }, 2000); // Περίμενε να τελειώσει το fade-out
+    });
+}
+
+// Back to Home (ίδια σελίδα)
+function goHome() {
+    window.location.href = 'index.html';
+}
+
+function startShowcase() {
+    document.getElementById("waveContainer").style.display = "block";
+    startAudio();
+}
+
+setTimeout(updateCountdown, 1000);
+
+</script>
+
+</body>
+</html>
